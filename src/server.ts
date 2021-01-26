@@ -2,9 +2,10 @@ import 'reflect-metadata';
 import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-import { createConnection } from 'typeorm';
 import session from 'express-session';
 import cors from 'cors';
+
+// https://medium.com/@agentwhs/complete-guide-for-typescript-for-mongoose-for-node-js-8cc0a7e470c1
 
 import AuthRoute from './routes/auth';
 
@@ -25,13 +26,7 @@ const main = async () => {
 
   // DB Connection
   try {
-    await createConnection({
-      type: 'postgres',
-      url: process.env.DB_URL,
-      entities: [__dirname + '/entity/User.ts'],
-      logging: true,
-      synchronize: true,
-    });
+    // TODO: DB Connection must be here
   } catch (error) {
     console.log(`DB Connect Error: ${error}`);
   }
