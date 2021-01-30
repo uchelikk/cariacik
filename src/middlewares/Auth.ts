@@ -5,7 +5,7 @@ export const Auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const isValid = jwt.verify(req.session.user, process.env.JWT_SECRET!);
 
-    if (isValid) { 
+    if (isValid) {
       const user = jwt.decode(req.session.user);
       res.locals.user = user;
       return next();

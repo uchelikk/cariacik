@@ -7,6 +7,7 @@ export interface IRoom extends Document {
   totalMoney: number;
   roomCode: string; // must be unique
   roomOwner: any;
+  users: [];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,7 +23,6 @@ export const RoomSchema = new Schema(
     description: {
       type: String,
       required: false,
-      minlength: [2, 'En az 2 karakter olmalıdır.'],
       maxlength: [1000, 'Açıklama çok uzun'],
     },
     totalMoney: { type: Number, required: false, default: 0 },
@@ -34,6 +34,13 @@ export const RoomSchema = new Schema(
         customAlphabet('ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZQWX1234567890', 8)(),
     },
     roomOwner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    users: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
   },
   { timestamps: true }
 );
