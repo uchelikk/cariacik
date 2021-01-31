@@ -11,9 +11,13 @@ import connectMongo from 'connect-mongo';
 
 import AuthRoute from './routes/auth';
 import RoomRoute from './routes/rooms';
+import OutgoingsRoute from './routes/outgoings';
+import IncomesRoutes from './routes/incomes';
+import TestRoutes from './routes/test';
 
 import { Auth } from './middlewares/Auth';
 import { Error } from './middlewares/Error';
+import { body, sanitize } from 'express-validator';
 
 const __prod__ = process.env.NODE_ENV === 'production';
 dotenv.config({
@@ -27,6 +31,7 @@ const main = async () => {
 
   app.use(express.json());
   app.use(morgan('dev'));
+
   const MongoStore = connectMongo(session);
 
   // DB Connection
@@ -67,8 +72,14 @@ const main = async () => {
     })
   );
 
+  // escape all and trim!
+  app.use(body('*').escape().trim());
+
   app.use('/api/auth', AuthRoute);
   app.use('/api/rooms', Auth, RoomRoute);
+  app.use('/api/outgoings', Auth, OutgoingsRoute);
+  app.use('/api/incomes', Auth, IncomesRoutes);
+  app.use('/api', Auth, TestRoutes);
 
   app.use(Error);
   app.listen(PORT, () => {
