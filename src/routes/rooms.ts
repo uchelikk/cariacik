@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Room, { IRoom } from '../schema/rooms';
+import * as v from '../utils/validations';
 
 const createRoom = async (req: Request, res: Response) => {
   try {
@@ -117,9 +118,9 @@ const deleteRoom = async (req: Request, res: Response) => {
 };
 
 const router = Router();
-router.post('/create', createRoom);
+router.post('/create', [v.name, v.description], v.isError, createRoom);
 router.get('/:id', getRoom);
-router.post('/update/:id', updateRoom);
+router.post('/update/:id', [v.name, v.description], v.isError, updateRoom);
 router.post('/delete/:id', deleteRoom);
-router.post('/join', joinRoom);
+router.post('/join', [v.roomCode], v.isError, joinRoom);
 export default router;

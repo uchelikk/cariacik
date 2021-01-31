@@ -17,13 +17,10 @@ export const RoomSchema = new Schema(
     name: {
       type: String,
       required: true,
-      minlength: [2, 'En az 2 karakter olmalıdır.'],
-      maxlength: [100, 'Oda ismi çok uzun'],
     },
     description: {
       type: String,
       required: false,
-      maxlength: [1000, 'Açıklama çok uzun'],
     },
     totalMoney: { type: Number, required: false, default: 0 },
     roomCode: {

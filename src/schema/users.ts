@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import validator from 'validator';
 import bcryptjs from 'bcryptjs';
 
 export interface IUser extends Document {
@@ -14,28 +13,16 @@ export const UserSchema = new Schema(
   {
     email: {
       type: String,
-      required: [true, 'Email zorunludur.'],
+      required: true,
       unique: true,
-      // validate: {
-      //   validator: (data: string) => {
-      //     if (!validator.isEmail(data)) return false;
-      //     return true;
-      //   },
-      //   message: 'Email değeri geçersiz!',
-      // },
-      validate: [validator.isEmail, 'Geçerli bir mail adresi giriniz.'],
     },
     password: {
       type: String,
       required: true,
-      minlength: [6, 'Şifre en az 6 karakter olmalıdır.'],
-      maxlength: [50, 'Şifre çok uzun'],
     },
     fullName: {
       type: String,
       required: true,
-      minlength: [3, 'İsim çok kısa'],
-      maxlength: [50, 'İsim çok uzun'],
     },
   },
   { timestamps: true }

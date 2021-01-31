@@ -16,12 +16,9 @@ export const OutgoingsSchema = new Schema(
     name: {
       type: String,
       required: true,
-      minlength: [2, 'En az 2 karakterden oluşmalıdır.'],
-      maxlength: [100, 'En fazla 100 karakter içerebilir.'],
     },
     description: {
       type: String,
-      maxlength: [100, 'En fazla 100 karakter içerebilir.'],
     },
     amount: {
       type: Number,

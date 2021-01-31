@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import * as v from '../utils/validations';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../schema/users';
@@ -43,8 +44,13 @@ const login = async (req: Request, res: Response) => {
 };
 
 const router = Router();
-router.post('/register', register);
-router.post('/login', login);
+router.post(
+  '/register',
+  [v.email, v.fullName, v.password],
+  v.isError,
+  register
+);
+router.post('/login', [v.email, v.password], v.isError, login);
 export default router;
 
 /**

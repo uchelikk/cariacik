@@ -17,7 +17,7 @@ import TestRoutes from './routes/test';
 
 import { Auth } from './middlewares/Auth';
 import { Error } from './middlewares/Error';
-import { body, sanitize } from 'express-validator';
+import { body, query, param } from 'express-validator';
 
 const __prod__ = process.env.NODE_ENV === 'production';
 dotenv.config({
@@ -74,6 +74,8 @@ const main = async () => {
 
   // escape all and trim!
   app.use(body('*').escape().trim());
+  app.use(query('*').escape().trim());
+  app.use(param('*').escape().trim());
 
   app.use('/api/auth', AuthRoute);
   app.use('/api/rooms', Auth, RoomRoute);
