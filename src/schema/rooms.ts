@@ -21,6 +21,7 @@ export const RoomSchema = new Schema(
     description: {
       type: String,
       required: false,
+      default: '',
     },
     totalMoney: { type: Number, required: false, default: 0 },
     roomCode: {

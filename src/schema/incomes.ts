@@ -19,6 +19,7 @@ export const IncomesSchema = new Schema(
     },
     description: {
       type: String,
+      default: '',
     },
     amount: {
       type: Number,
