@@ -6,9 +6,10 @@ import User from '../schema/users';
 
 const register = async (req: Request, res: Response) => {
   const { email, password, fullName } = req.body;
+  const hPassword = await bcryptjs.hash(password, 10);
 
   try {
-    const user = new User({ email, fullName, password });
+    const user = new User({ email, fullName, password: hPassword });
     await user.save();
 
     return res.json({ user });
