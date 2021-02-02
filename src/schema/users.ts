@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import bcryptjs from 'bcryptjs';
 
 export interface IUser extends Document {
   email: string;
@@ -15,10 +14,12 @@ export const UserSchema = new Schema(
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
     },
     password: {
       type: String,
       required: true,
+      select: false,
     },
     fullName: {
       type: String,

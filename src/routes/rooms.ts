@@ -47,11 +47,14 @@ const joinRoom = async (req: Request, res: Response) => {
     const isRoom = await Room.findOne({ roomCode });
     if (!isRoom) throw new Error('Wrong room code!');
 
-    if (isRoom.users.includes(user.id)) {
+    if (
+      isRoom.users.includes(user.id) ||
+      mongoose.Types.ObjectId(user.id).equals(isRoom.roomOwner)
+    ) {
       throw new Error('Already joinned!');
     } else {
       // Added in ROOM
-      const result = await Room.updateOne(
+      const result = await Room.findOneAndUpdate(
         { roomCode },
         {
           $addToSet: {
@@ -117,10 +120,39 @@ const deleteRoom = async (req: Request, res: Response) => {
   }
 };
 
+const usersRooms = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = res.locals.user;
+    if (user.id != mongoose.Types.ObjectId(id)) {
+      throw new Error('Not Authorization');
+    } else {
+      const owned = await Room.find({
+        roomOwner: mongoose.Types.ObjectId(id),
+      });
+
+      const joined = await Room.find({
+        users: {
+          $in: user.id,
+        },
+      });
+
+      return res.json({
+        owned,
+        joined,
+      });
+    }
+  } catch (err) {
+    return res.json({ error: err.message });
+  }
+};
+
 const router = Router();
 router.post('/create', [v.name, v.description], v.isError, createRoom);
 router.get('/:id', getRoom);
 router.post('/update/:id', [v.name, v.description], v.isError, updateRoom);
 router.post('/delete/:id', deleteRoom);
+
 router.post('/join', [v.roomCode], v.isError, joinRoom);
+router.get('/user/:id', usersRooms);
 export default router;

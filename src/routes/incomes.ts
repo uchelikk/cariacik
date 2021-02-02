@@ -1,8 +1,12 @@
 import { Router, Request, Response } from 'express';
+import Incomes from '../schema/incomes';
 
-const createIncomes = (req: Request, res: Response) => {
-  console.log(req);
-  return res.json({ page: 'Incomes create' });
+const createIncomes = async (req: Request, res: Response) => {
+  const user = res.locals.user;
+  const { room, name, description, amount } = req.body;
+  const incomes = new Incomes({ name, description, amount, room, user });
+  const result = incomes.save();
+  return res.json(result);
 };
 
 const readIncomes = (req: Request, res: Response) => {

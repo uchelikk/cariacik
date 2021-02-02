@@ -27,7 +27,7 @@ const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }, 'password');
 
     const comparedPassword = await bcryptjs.compare(password, user.password);
     if (comparedPassword) {
@@ -35,7 +35,7 @@ const login = async (req: Request, res: Response) => {
         { id: user.id, email: user.email, fullName: user.fullName },
         process.env.JWT_SECRET!
       );
-      return res.json({ login: true });
+      return res.json({ login: true, user: user.id });
     } else {
       throw Error('login failed');
     }
