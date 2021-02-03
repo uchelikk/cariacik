@@ -11,7 +11,7 @@ export const Auth = async (req: Request, res: Response, next: NextFunction) => {
       return next();
     } else {
       res.locals.user = undefined;
-      return next('Not login');
+      return next('Giriş yapılmadı!');
     }
   } catch (error) {
     next(error);

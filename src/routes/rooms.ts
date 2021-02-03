@@ -42,16 +42,16 @@ const joinRoom = async (req: Request, res: Response) => {
   const { roomCode } = req.body;
   const user = res.locals.user;
   try {
-    if (!user) throw new Error('Not logged!');
+    if (!user) throw new Error('Giriş yapılmamış!');
 
     const isRoom = await Room.findOne({ roomCode });
-    if (!isRoom) throw new Error('Wrong room code!');
+    if (!isRoom) throw new Error('Hatalı davet kodu!');
 
     if (
       isRoom.users.includes(user.id) ||
       mongoose.Types.ObjectId(user.id).equals(isRoom.roomOwner)
     ) {
-      throw new Error('Already joinned!');
+      throw new Error('Önceden katıldınız!');
     } else {
       // Added in ROOM
       const result = await Room.findOneAndUpdate(
@@ -83,7 +83,7 @@ const updateRoom = async (req: Request, res: Response) => {
     const room: IRoom = await Room.findById(id);
 
     if (room.roomOwner + '' !== user.id + '')
-      throw new Error('Not Authorization');
+      throw new Error('Yetkiniz bulunmamaktadır.');
 
     const result = await Room.findOneAndUpdate(
       { _id: mongoose.Types.ObjectId(id) },
@@ -106,7 +106,7 @@ const deleteRoom = async (req: Request, res: Response) => {
     const room: IRoom = await Room.findById(id);
 
     if (room.roomOwner + '' !== user.id + '')
-      throw new Error('Not Authorization');
+      throw new Error('Yetkiniz bulunmamaktadır.');
 
     // Delete Room
     // TODO: Delete other parts, too...
@@ -125,7 +125,7 @@ const usersRooms = async (req: Request, res: Response) => {
     const { id } = req.params;
     const user = res.locals.user;
     if (user.id != mongoose.Types.ObjectId(id)) {
-      throw new Error('Not Authorization');
+      throw new Error('Yetkiniz bulunmamaktadır.');
     } else {
       const owned = await Room.find({
         roomOwner: mongoose.Types.ObjectId(id),

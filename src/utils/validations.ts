@@ -3,7 +3,7 @@ import { check, validationResult } from 'express-validator';
 import Room from '../schema/rooms';
 
 /* Users */
-export const email = check('email', 'Hatalı mail adresi')
+export const email = check('email', 'Email adresi hatalı.')
   .isEmail()
   .normalizeEmail();
 
@@ -11,28 +11,30 @@ export const fullName = check('fullName')
   .isLength({ min: 3 })
   .withMessage('En az 2 karakterden oluşmalıdır.')
   .isLength({ max: 120 })
-  .withMessage('Fazla uzun');
+  .withMessage('Fazla uzun. En fazla 120 karakter olmalıdır.');
 
 export const password = check('password')
   .isLength({ min: 6 })
   .withMessage('En az 6 karakterden oluşmalıdır.')
   .isLength({ max: 120 })
-  .withMessage('Fazla uzun');
+  .withMessage('Fazla uzun. En fazla 120 karakter olmalıdır.');
 
 /* Room */
 export const name = check('name')
   .isLength({ min: 2 })
   .withMessage('En az 2 karakterden oluşmalıdır.')
   .isLength({ max: 100 })
-  .withMessage('Fazla uzun');
+  .withMessage('Fazla uzun. En fazla 100 karakter olmalıdır.');
 
 export const description = check('description')
   .isLength({ max: 150 })
-  .withMessage('Fazla uzun');
+  .withMessage('Fazla uzun. En fazla 150 karakter olmalıdır.');
 
-export const amount = check('amount')
+export const iAmount = check('amount')
   .isNumeric()
-  .withMessage('Miktar rakam olmalıdır.');
+  .withMessage('Miktar rakam olmalıdır.')
+  .isCurrency({ allow_negatives: false })
+  .withMessage('Negatif olamaz.');
 
 export const roomCode = check('roomCode')
   .isLength({ min: 8, max: 8 })
@@ -50,7 +52,7 @@ export const isRoomMember = () => {
           $or: [{ roomOwner: user }, { users: { $in: user } }],
         });
 
-        if (!result) return Promise.reject('Not authorized!');
+        if (!result) return Promise.reject('Yetkiniz bulunmamaktadır!');
         else return Promise.resolve(true);
       })
       .run(req);

@@ -37,7 +37,7 @@ const login = async (req: Request, res: Response) => {
       );
       return res.json({ login: true, user: user.id });
     } else {
-      throw Error('login failed');
+      throw Error('Giriş başarısız!');
     }
   } catch (error) {
     return res.json({ login: false });

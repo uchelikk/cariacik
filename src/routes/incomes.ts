@@ -1,12 +1,17 @@
 import { Router, Request, Response } from 'express';
 import Incomes from '../schema/incomes';
+import * as v from '../utils/validations';
 
 const createIncomes = async (req: Request, res: Response) => {
-  const user = res.locals.user;
-  const { room, name, description, amount } = req.body;
-  const incomes = new Incomes({ name, description, amount, room, user });
-  const result = incomes.save();
-  return res.json(result);
+  try {
+    const user = res.locals.user.id;
+    const { room, name, description, amount } = req.body;
+    const incomes = new Incomes({ name, description, amount, room, user });
+    const result = await incomes.save();
+    return res.json(result);
+  } catch (error) {
+    return res.json({ error: "Gelir kaydı oluşturulamadı." });
+  }
 };
 
 const readIncomes = (req: Request, res: Response) => {
@@ -30,7 +35,14 @@ const setActive = (req: Request, res: Response) => {
 };
 
 const router = Router();
-router.post('/create', createIncomes);
+router.post(
+  '/create',
+  v.name,
+  v.description,
+  v.iAmount,
+  v.isRoomMember(),
+  createIncomes
+);
 router.get('/:id', readIncomes);
 router.post('/update/:id', updateIncomes);
 router.post('/delete/:id', deleteIncomes);
