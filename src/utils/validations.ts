@@ -34,7 +34,7 @@ export const iAmount = check('amount')
   .isNumeric()
   .withMessage('Miktar rakam olmalıdır.')
   .isCurrency({ allow_negatives: false })
-  .withMessage('Negatif olamaz.');
+  .withMessage('Miktar negatif olamaz');
 
 export const roomCode = check('roomCode')
   .isLength({ min: 8, max: 8 })

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import morgan from 'morgan';
 import session from 'express-session';
 import cors from 'cors';
-import mongoose from 'mongoose';
+import mongo from './utils/mongo';
 import connectMongo from 'connect-mongo';
 
 // https://medium.com/@agentwhs/complete-guide-for-typescript-for-mongoose-for-node-js-8cc0a7e470c1
@@ -34,20 +34,7 @@ const main = async () => {
 
   const MongoStore = connectMongo(session);
 
-  // DB Connection
-  mongoose.connect(DB_URL!, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-  });
-
-  mongoose.connection.on('open', () => {
-    console.log('DB Connected');
-  });
-
-  mongoose.connection.on('error', (err) => {
-    console.log(`DB Connection Error: ${err}`);
-  });
+  const db = await mongo(DB_URL!);
 
   app.use(
     session({
@@ -61,7 +48,7 @@ const main = async () => {
       secret: SESSION_SECRET_KEY!,
       saveUninitialized: true,
       resave: true,
-      store: new MongoStore({ mongooseConnection: mongoose.connection }),
+      store: new MongoStore({ mongooseConnection: db.connection }),
     })
   );
 
@@ -82,8 +69,8 @@ const main = async () => {
   app.use('/api/outgoings', Auth, OutgoingsRoute);
   app.use('/api/incomes', Auth, IncomesRoutes);
   app.use('/api', Auth, TestRoutes);
-
   app.use(Error);
+
   app.listen(PORT, () => {
     console.log(`Server started at port: ${PORT}`);
   });
