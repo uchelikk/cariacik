@@ -51,7 +51,7 @@ const readIncomes = async (req: Request, res: Response) => {
   const incomes = await Incomes.find({
     room: mongoose.Types.ObjectId(id),
   })
-    .sort({ createdAt: -1 })
+    .sort({ updatedAt: -1 })
     .limit(LIMIT)
     .skip(LIMIT * PAGE)
     .populate('user');
@@ -131,7 +131,7 @@ const router = Router();
 router.post(
   '/create',
   v.name,
-  v.description,
+  v.description,  
   v.iAmount,
   v.isRoomMember(),
   v.isError,

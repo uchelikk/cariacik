@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import Incomes from '../schema/incomes';
+import Outgoings from '../schema/outgoings';
 import Room, { IRoom } from '../schema/rooms';
 import * as v from '../utils/validations';
 
@@ -110,9 +112,11 @@ const deleteRoom = async (req: Request, res: Response) => {
 
     // Delete Room
     // TODO: Delete other parts, too...
-    const result = await Room.findByIdAndDelete(id);
+    const deletedRoom = await Room.findByIdAndDelete(id);
+    const incomes = deletedRoom ? await Incomes.remove({ room: room._id }) : {};
+    const out = deletedRoom ? await Outgoings.remove({ room: room._id }) : {};
 
-    return res.json(result);
+    return res.json({ room: deletedRoom, incomes, outgoings: out });
   } catch (err) {
     return res.status(400).json({
       error: err.message,
