@@ -19,12 +19,12 @@ import { Auth } from './middlewares/Auth';
 import { Error } from './middlewares/Error';
 import { body, query, param } from 'express-validator';
 
-const __prod__ = process.env.NODE_ENV === 'production';
-dotenv.config({
-  path: __prod__ ? '.env' : '.env.development',
-});
+// dotenv.config({
+//   path: __prod__ ? '.env' : '.env.development',
+// });
+dotenv.config();
 
-const { PORT, SESSION_SECRET_KEY, CORS_ORIGINS, DB_URL } = process.env;
+const { PORT, SESSION_SECRET_KEY, DB_URL } = process.env;
 
 const main = async () => {
   const app = express();
@@ -54,7 +54,7 @@ const main = async () => {
 
   app.use(
     cors({
-      origin: CORS_ORIGINS,
+      origin: '*',
       credentials: true,
     })
   );
