@@ -5,5 +5,5 @@ const test = async (_req: Request, res: Response) => {
 };
 
 const router = Router();
-router.post('/test', test);
+router.get('/test', test);
 export default router;
