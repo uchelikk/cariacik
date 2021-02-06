@@ -34,7 +34,7 @@ const main = async () => {
 
   const MongoStore = connectMongo(session);
 
-  const db = await mongo(DB_URL!);
+  const db = mongo(DB_URL!);
 
   app.use(
     session({
@@ -43,7 +43,7 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 1, //1 years
         httpOnly: true,
         sameSite: 'lax',
-        secure: __prod__,
+        secure: false,
       },
       secret: SESSION_SECRET_KEY!,
       saveUninitialized: true,
