@@ -145,11 +145,17 @@ const usersRooms = async (req: Request, res: Response) => {
 };
 
 const getTimeLane = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  let timeline = await Timelanes.find({ room: toid(id) }).sort({
-    updatedAt: -1,
-  });
-  //if (timeline) timeline = await timeline.populate('user').execPopulate();
+  const { id, page } = req.params;
+  const LIMIT = 30;
+  const PAGE: number =
+    page === 'undefined' ? 0 : parseInt(page) > 0 ? parseInt(page) - 1 : 0;
+  let timeline = await Timelanes.find({ room: toid(id) })
+    .sort({
+      updatedAt: -1,
+    })
+    .limit(LIMIT)
+    .skip(LIMIT * PAGE)
+    .populate('user');
 
   return res.json(timeline);
 };
@@ -159,7 +165,7 @@ router.post('/create', [v.name, v.description], v.isError, createRoom);
 router.get('/:id', getRoom);
 router.post('/update/:id', [v.name, v.description], v.isError, updateRoom);
 router.post('/delete/:id', deleteRoom);
-router.get('/:id/timeline', getTimeLane);
+router.get('/:id/timeline/:page', getTimeLane);
 
 router.post('/join', [v.roomCode], v.isError, joinRoom);
 router.get('/user/:id', usersRooms);

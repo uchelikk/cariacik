@@ -1,9 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
 import morgan from 'morgan';
 import session from 'express-session';
 import cors from 'cors';
-import mongo from './utils/mongo';
+import mongoose from 'mongoose';
 import connectMongo from 'connect-mongo';
 
 // https://medium.com/@agentwhs/complete-guide-for-typescript-for-mongoose-for-node-js-8cc0a7e470c1
@@ -19,11 +20,6 @@ import { Auth } from './middlewares/Auth';
 import { Error } from './middlewares/Error';
 import { body, query, param } from 'express-validator';
 
-// dotenv.config({
-//   path: __prod__ ? '.env' : '.env.development',
-// });
-dotenv.config();
-
 const { PORT, SESSION_SECRET_KEY, DB_URL } = process.env;
 
 const main = async () => {
@@ -32,9 +28,22 @@ const main = async () => {
   app.use(express.json());
   app.use(morgan('dev'));
 
-  const MongoStore = connectMongo(session);
+  mongoose.connect(DB_URL!, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  });
 
-  const db = mongo(DB_URL!);
+  mongoose.connection.on('open', () => {
+    console.log('DB Connected');
+  });
+
+  mongoose.connection.on('error', (err) => {
+    console.log(`DB Connection Error: ${err}`);
+  });
+
+  const MongoStore = connectMongo(session);
 
   app.use(
     session({
@@ -48,7 +57,7 @@ const main = async () => {
       secret: SESSION_SECRET_KEY!,
       saveUninitialized: true,
       resave: true,
-      store: new MongoStore({ mongooseConnection: db.connection }),
+      store: new MongoStore({ mongooseConnection: mongoose.connection }),
     })
   );
 
