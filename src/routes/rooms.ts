@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import toid from '../utils//id';
 import Timelanes from '../schema/timelanes';
-import Room, { IRoom } from '../schema/rooms';
+import Room from '../schema/rooms';
 import * as v from '../utils/validations';
 
 const createRoom = async (req: Request, res: Response) => {
@@ -81,13 +81,9 @@ const updateRoom = async (req: Request, res: Response) => {
     const { name, description } = req.body;
     const { id } = req.params;
     const user = res.locals.user;
-    const room: IRoom = await Room.findById(id);
-
-    if (room.roomOwner + '' !== user.id + '')
-      throw new Error('Yetkiniz bulunmamaktadır.');
 
     const result = await Room.findOneAndUpdate(
-      { _id: toid(id) },
+      { _id: toid(id), roomOwner: toid(user.id) },
       { name, description },
       { new: true }
     );
@@ -148,12 +144,22 @@ const usersRooms = async (req: Request, res: Response) => {
   }
 };
 
+const getTimeLane = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  let timeline = await Timelanes.find({ room: toid(id) }).sort({
+    updatedAt: -1,
+  });
+  //if (timeline) timeline = await timeline.populate('user').execPopulate();
+
+  return res.json(timeline);
+};
+
 const router = Router();
 router.post('/create', [v.name, v.description], v.isError, createRoom);
 router.get('/:id', getRoom);
 router.post('/update/:id', [v.name, v.description], v.isError, updateRoom);
 router.post('/delete/:id', deleteRoom);
-// router.get('/:id/:timelane', getTimeLane);
+router.get('/:id/timeline', getTimeLane);
 
 router.post('/join', [v.roomCode], v.isError, joinRoom);
 router.get('/user/:id', usersRooms);
