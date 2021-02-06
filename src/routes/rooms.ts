@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
-import mongoose from 'mongoose';
-import Incomes from '../schema/incomes';
-import Outgoings from '../schema/outgoings';
+import toid from '../utils//id';
+import Timelanes from '../schema/timelanes';
 import Room, { IRoom } from '../schema/rooms';
 import * as v from '../utils/validations';
 
@@ -12,7 +11,7 @@ const createRoom = async (req: Request, res: Response) => {
     // Max Room Rate;
     const user = res.locals.user.id;
     const roomCount = await Room.find({
-      roomOwner: mongoose.Types.ObjectId(user),
+      roomOwner: toid(user),
     });
     if (roomCount >= 10) throw new Error('Çok fazla oda oluşturdunuz');
     const room = new Room({
@@ -51,7 +50,7 @@ const joinRoom = async (req: Request, res: Response) => {
 
     if (
       isRoom.users.includes(user.id) ||
-      mongoose.Types.ObjectId(user.id).equals(isRoom.roomOwner)
+      toid(user.id).equals(isRoom.roomOwner)
     ) {
       throw new Error('Önceden katıldınız!');
     } else {
@@ -88,7 +87,7 @@ const updateRoom = async (req: Request, res: Response) => {
       throw new Error('Yetkiniz bulunmamaktadır.');
 
     const result = await Room.findOneAndUpdate(
-      { _id: mongoose.Types.ObjectId(id) },
+      { _id: toid(id) },
       { name, description },
       { new: true }
     );
@@ -105,18 +104,16 @@ const deleteRoom = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const user = res.locals.user;
-    const room: IRoom = await Room.findById(id);
-
-    if (room.roomOwner + '' !== user.id + '')
-      throw new Error('Yetkiniz bulunmamaktadır.');
 
     // Delete Room
     // TODO: Delete other parts, too...
-    const deletedRoom = await Room.findByIdAndDelete(id);
-    const incomes = deletedRoom ? await Incomes.remove({ room: room._id }) : {};
-    const out = deletedRoom ? await Outgoings.remove({ room: room._id }) : {};
+    const room = await Room.findOneAndDelete({
+      _id: toid(id),
+      roomOwner: toid(user.id),
+    });
+    const timelanes = room ? await Timelanes.remove({ room: room._id }) : {};
 
-    return res.json({ room: deletedRoom, incomes, outgoings: out });
+    return res.json({ room, timelanes });
   } catch (err) {
     return res.status(400).json({
       error: err.message,
@@ -128,11 +125,11 @@ const usersRooms = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const user = res.locals.user;
-    if (user.id != mongoose.Types.ObjectId(id)) {
+    if (user.id != toid(id)) {
       throw new Error('Yetkiniz bulunmamaktadır.');
     } else {
       const owned = await Room.find({
-        roomOwner: mongoose.Types.ObjectId(id),
+        roomOwner: toid(id),
       });
 
       const joined = await Room.find({
@@ -156,6 +153,7 @@ router.post('/create', [v.name, v.description], v.isError, createRoom);
 router.get('/:id', getRoom);
 router.post('/update/:id', [v.name, v.description], v.isError, updateRoom);
 router.post('/delete/:id', deleteRoom);
+// router.get('/:id/:timelane', getTimeLane);
 
 router.post('/join', [v.roomCode], v.isError, joinRoom);
 router.get('/user/:id', usersRooms);

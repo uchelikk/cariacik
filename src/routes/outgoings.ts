@@ -1,49 +1,58 @@
 import { Router, Request, Response } from 'express';
 import * as v from '../utils/validations';
-import Outgoings from '../schema/outgoings';
+import Timelanes, { TimelaneTYPE } from '../schema/timelanes';
 import toid from '../utils/id';
 import Room from '../schema/rooms';
 
-const createOutgoings = async (req: Request, res: Response) => {
+const createtimelanes = async (req: Request, res: Response) => {
   try {
     const user = res.locals.user.id;
     const { room, name, description, amount } = req.body;
-    const outgoings = new Outgoings({ name, description, amount, room, user });
-    const result = await outgoings.save();
+    const timelanes = new Timelanes({
+      name,
+      description,
+      amount,
+      room,
+      user,
+      type: TimelaneTYPE.OUTGOING,
+    });
+    const result = await timelanes.save();
     return res.json(result);
   } catch (error) {
     return res.json({ error: 'Gider kaydı oluşturulamadı.' });
   }
 };
 
-const readOutgoings = async (req: Request, res: Response) => {
+const readtimelanes = async (req: Request, res: Response) => {
   const { id, page } = req.params;
   const LIMIT = 30;
   const PAGE: number =
     page === 'undefined' ? 0 : parseInt(page) > 0 ? parseInt(page) - 1 : 0;
 
-  const outgoings = await Outgoings.find({
+  const timelanes = await Timelanes.find({
     room: toid(id),
+    type: TimelaneTYPE.OUTGOING,
   })
     .sort({ updatedAt: -1 })
     .limit(LIMIT)
     .skip(LIMIT * PAGE)
     .populate('user');
 
-  return res.json(outgoings);
+  return res.json(timelanes);
 };
 
-const updateOutgoings = async (req: Request, res: Response) => {
+const updatetimelanes = async (req: Request, res: Response) => {
   // FALSE olanlar güncellenmelidir. Yoksa karışıklık olur.
   try {
     const user = res.locals.user.id;
     const { id } = req.params;
     const { name, description, amount } = req.body;
-    const result = await Outgoings.findOneAndUpdate(
+    const result = await Timelanes.findOneAndUpdate(
       {
         _id: toid(id),
         user: toid(user),
-        isActive: false,
+        active: false,
+        type: TimelaneTYPE.OUTGOING,
       },
       {
         name,
@@ -58,11 +67,15 @@ const updateOutgoings = async (req: Request, res: Response) => {
   }
 };
 
-const deleteOutgoings = async (req: Request, res: Response) => {
+const deletetimelanes = async (req: Request, res: Response) => {
   const { id } = req.params;
   const user = res.locals.user.id;
   try {
-    const result = await Outgoings.findOneAndDelete({ _id: id, user });
+    const result = await Timelanes.findOneAndDelete({
+      _id: id,
+      user,
+      type: TimelaneTYPE.OUTGOING,
+    });
     return res.json(result);
   } catch (error) {
     return res.json(error);
@@ -73,17 +86,22 @@ const setActive = async (req: Request, res: Response) => {
   const id = req.params.id;
   const user = res.locals.user.id;
   try {
-    const original = await Outgoings.findOne({
+    const original = await Timelanes.findOne({
       _id: toid(id),
       user: toid(user),
+      type: TimelaneTYPE.OUTGOING,
     });
 
     if (original) {
-      if (original.isActive) {
+      if (original.active) {
         // De Active Edilecek.
-        const updateActivate = await Outgoings.findOneAndUpdate(
-          { _id: original.id, user: original.user },
-          { isActive: false },
+        const updateActivate = await Timelanes.findOneAndUpdate(
+          {
+            _id: original.id,
+            user: original.user,
+            type: TimelaneTYPE.OUTGOING,
+          },
+          { active: false },
           { new: true }
         );
 
@@ -97,12 +115,16 @@ const setActive = async (req: Request, res: Response) => {
           { new: true }
         );
 
-        return res.json({ room: updateRoom, outgoings: updateActivate });
+        return res.json({ room: updateRoom, outgoing: updateActivate });
       } else {
         // Active Edilecek.
-        const updateActivate = await Outgoings.findOneAndUpdate(
-          { _id: original.id, user: original.user },
-          { isActive: true },
+        const updateActivate = await Timelanes.findOneAndUpdate(
+          {
+            _id: original.id,
+            user: original.user,
+            type: TimelaneTYPE.OUTGOING,
+          },
+          { active: true },
           { new: true }
         );
 
@@ -116,7 +138,7 @@ const setActive = async (req: Request, res: Response) => {
           { new: true }
         );
 
-        return res.json({ room: updateRoom, outgoings: updateActivate });
+        return res.json({ room: updateRoom, outgoing: updateActivate });
       }
     } else {
       return res.json({});
@@ -134,18 +156,18 @@ router.post(
   v.iAmount,
   v.isRoomMember(),
   v.isError,
-  createOutgoings
+  createtimelanes
 );
-router.get('/:id/:page?', readOutgoings);
+router.get('/:id/:page?', readtimelanes);
 router.post(
   '/update/:id',
   v.name,
   v.description,
   v.iAmount,
   v.isError,
-  updateOutgoings
+  updatetimelanes
 );
-router.post('/delete/:id', deleteOutgoings);
+router.post('/delete/:id', deletetimelanes);
 
 router.post('/active/:id', setActive);
 export default router;

@@ -1,17 +1,24 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IOutgoings extends Document {
-  name: string;
+export enum TimelaneTYPE {
+  INCOME = 1,
+  OUTGOING = 2,
+  SHOP = 3,
+}
+
+export interface ITimelane extends Document {
+  name?: string;
   description?: string;
-  amount: string;
-  isActive: boolean;
-  room: any;
-  user: any;
+  amount?: string;
+  active?: boolean;
+  room?: any;
+  user?: any;
+  type?: TimelaneTYPE;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export const OutgoingsSchema = new Schema(
+export const TimelanesSchema = new Schema(
   {
     name: {
       type: String,
@@ -25,10 +32,14 @@ export const OutgoingsSchema = new Schema(
       type: Number,
       required: true,
     },
-    isActive: {
+    active: {
       type: Boolean,
       required: true,
       default: false,
+    },
+    type: {
+      type: TimelaneTYPE,
+      required: true,
     },
     room: {
       type: Schema.Types.ObjectId,
@@ -44,8 +55,8 @@ export const OutgoingsSchema = new Schema(
   { timestamps: true }
 );
 
-const Outgoings = mongoose.model<IOutgoings>('Outgoings', OutgoingsSchema);
-export default Outgoings;
+const Timelanes = mongoose.model<ITimelane>('Timelanes', TimelanesSchema);
+export default Timelanes;
 
 /**
  * id
