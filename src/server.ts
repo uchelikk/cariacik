@@ -68,7 +68,7 @@ const main = async () => {
   app.use('/api/rooms', Auth, RoomRoute);
   app.use('/api/outgoings', Auth, OutgoingsRoute);
   app.use('/api/incomes', Auth, IncomesRoutes);
-  app.use('/api', Auth, TestRoutes);
+  app.use('/api', TestRoutes);
   app.use(Error);
 
   app.listen(PORT, () => {
