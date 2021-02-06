@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start:dev": "nodemon dist/server.js",
+    "start": "node dist/server.js",
+    "build": "tsc",
     "watch": "tsc -w",
     "dev": "concurrently \"npm run watch\" \"npm run start:dev\""
   },
